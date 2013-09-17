@@ -156,7 +156,7 @@ PIs also recognize pseudo-attributes in the instruction.
 	>>> token.instruction
 	'simple instruction att1="one" attr2="two"'
 
-XML Declarations (XmlDecl) are a subclass of PI and so have the save
+XML Declarations (XmlDecl) are a subclass of PI and so have the same
 properties.
 
     >>> token = XmlDecl('<?xml version="1.0" encoding="utf-8"?>')

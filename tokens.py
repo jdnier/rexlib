@@ -12,8 +12,13 @@ import sys
 from collections import OrderedDict
 
 from .rex import XML_SPE_, ElemTagRE_, AttRE_
-#from rex_sgml import SGML_SPE_
 
+__all__ = [
+    'Cdata', 'Comment', 'Doctype', 'Empty', 'End', 'Error', 'PI', 'Start', 'StartOrEmpty', 'Tag',
+    'Text', 'Token', 'XmlDecl',
+    'tokenize',
+    'RexlibError', 'MarkupError', 'WellformednessError', 'SecondaryParsingError'
+]
 
 #
 # Token Classes
@@ -608,7 +613,7 @@ class AttributeDict(OrderedDict):
             if self.token:
                 self.token.reserialize()
 
-    def set_attribute_order(self, attribute_order, sort=False):
+    def set_attribute_order(self, attribute_order=None, sort=False):
         """
         Re-order attributes based on attribute_order list. Any attributes
         listed in attribute_order will appear first (and in that order); any
