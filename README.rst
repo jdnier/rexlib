@@ -1,10 +1,10 @@
-======
-rexlib
-======
+=========================================
+rexlib – A lexical XML processing library
+=========================================
 
 ``rexlib`` is is a pure Python module for working with tokenized XML. It allows you to iterate through the tokens of an XML document just as you would iterate through items in a list and provides an API for manipulating tokens. By creating simple generator functions, you can create very focused XML filters that can be chained together to create surprisingly complex, robust, and efficient XML transformations.
 
-``rexlib`` works at the lexical level and is not necessarily concerned with well formedness or validity. It really shines when you want to make precisely targeted changes to an XML document without disturbing the rest of the document. It's also effective when you want a *simple* way to extract element and attribute content from XML. It's well suited for working with XML that is not well formed, XML that contains syntax errors in markup, and XML where you want control over lexical details that are normally discarded by XML parsers. Text or source code containing islands of markup can also be usefully manulipulated. 
+``rexlib`` works at the lexical level and is not necessarily concerned with well formedness or validity. It excels when you want to make precisely targeted changes to an XML document without disturbing the rest of the document. It's also effective when you want a *simple* way to extract element and attribute content from XML. It's well suited for working with XML that is not well formed, XML that contains syntax errors in markup, and XML where you want control over lexical details that are normally discarded by XML parsers. Text or source code containing islands of markup can also be usefully manulipulated. 
 
 Because ``rexlib`` is relatively simple and implemented in Python, you can use it to create practical, roll-your-own solutions.
 
