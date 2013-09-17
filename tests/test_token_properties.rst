@@ -8,153 +8,153 @@ Tests are in a subdirectory so some path munging is necessary.
 
 Import the token classes.
 
-	>>> from rexlib.tokens import *
+    >>> from rexlib.tokens import *
 
 Token properties
 ================
 
 Text tokens have a single property: isspace.
 
-	>>> token = Text('Here is some text.')
-	>>> token.xml
-	'Here is some text.'
-	>>> token.isspace
-	False
-	>>> token.xml = '  \n\t\v  '
-	>>> token.isspace
-	True
+    >>> token = Text('Here is some text.')
+    >>> token.xml
+    'Here is some text.'
+    >>> token.isspace
+    False
+    >>> token.xml = '  \n\t\v  '
+    >>> token.isspace
+    True
 
 Start tokens have two properties: name and ns_prefix.
 
-	>>> token = Start('<tagname attr1="one" attr2="two">')
-	>>> token.name
-	'tagname'
-	>>> token.xml
-	'<tagname attr1="one" attr2="two">'
-	>>> token.name = 'tagname2'
-	>>> token.xml
-	'<tagname2 attr1="one" attr2="two">'
-	>>> token = Start('<namespace:tagname attr1="one" attr2="two">')
-	>>> token.name
-	'namespace:tagname'
-	>>> token.ns_prefix
-	'namespace'
-	>>> token.ns_prefix = 'namespace2'
-	>>> token.xml
-	'<namespace2:tagname attr1="one" attr2="two">'
-	>>> token.name = 'tagname2'
-	>>> token.xml
-	'<tagname2 attr1="one" attr2="two">'
-	>>> token.ns_prefix
-	''
+    >>> token = Start('<tagname attr1="one" attr2="two">')
+    >>> token.name
+    'tagname'
+    >>> token.xml
+    '<tagname attr1="one" attr2="two">'
+    >>> token.name = 'tagname2'
+    >>> token.xml
+    '<tagname2 attr1="one" attr2="two">'
+    >>> token = Start('<namespace:tagname attr1="one" attr2="two">')
+    >>> token.name
+    'namespace:tagname'
+    >>> token.ns_prefix
+    'namespace'
+    >>> token.ns_prefix = 'namespace2'
+    >>> token.xml
+    '<namespace2:tagname attr1="one" attr2="two">'
+    >>> token.name = 'tagname2'
+    >>> token.xml
+    '<tagname2 attr1="one" attr2="two">'
+    >>> token.ns_prefix
+    ''
 
 Empty tokens have two properties: name and ns_prefix.
 
-	>>> token = Empty('<tagname attr1="one" attr2="two"/>')
-	>>> token.name
-	'tagname'
-	>>> token.xml
-	'<tagname attr1="one" attr2="two"/>'
-	>>> token.name = 'tagname2'
-	>>> token.xml
-	'<tagname2 attr1="one" attr2="two"/>'
-	>>> token = Empty('<namespace:tagname attr1="one" attr2="two"/>')
-	>>> token.name
-	'namespace:tagname'
-	>>> token.ns_prefix
-	'namespace'
-	>>> token.ns_prefix = 'namespace2'
-	>>> token.xml
-	'<namespace2:tagname attr1="one" attr2="two"/>'
-	>>> token.name = 'tagname2'
-	>>> token.xml
-	'<tagname2 attr1="one" attr2="two"/>'
-	>>> token.ns_prefix
-	''
+    >>> token = Empty('<tagname attr1="one" attr2="two"/>')
+    >>> token.name
+    'tagname'
+    >>> token.xml
+    '<tagname attr1="one" attr2="two"/>'
+    >>> token.name = 'tagname2'
+    >>> token.xml
+    '<tagname2 attr1="one" attr2="two"/>'
+    >>> token = Empty('<namespace:tagname attr1="one" attr2="two"/>')
+    >>> token.name
+    'namespace:tagname'
+    >>> token.ns_prefix
+    'namespace'
+    >>> token.ns_prefix = 'namespace2'
+    >>> token.xml
+    '<namespace2:tagname attr1="one" attr2="two"/>'
+    >>> token.name = 'tagname2'
+    >>> token.xml
+    '<tagname2 attr1="one" attr2="two"/>'
+    >>> token.ns_prefix
+    ''
 
 End tokens have two properties: name and ns_prefix.
 
-	>>> token = End('</tagname>')
-	>>> token.name
-	'tagname'
-	>>> token.xml
-	'</tagname>'
-	>>> token.name = 'tagname2'
-	>>> token.xml
-	'</tagname2>'
-	>>> token.name = 'namespace:tagname'
-	>>> token.xml
-	'</namespace:tagname>'
-	>>> token.name
-	'namespace:tagname'
-	>>> token.ns_prefix
-	'namespace'
-	>>> token.name = 'tagname2'
-	>>> token.xml
-	'</tagname2>'
-	>>> token.ns_prefix
-	''
+    >>> token = End('</tagname>')
+    >>> token.name
+    'tagname'
+    >>> token.xml
+    '</tagname>'
+    >>> token.name = 'tagname2'
+    >>> token.xml
+    '</tagname2>'
+    >>> token.name = 'namespace:tagname'
+    >>> token.xml
+    '</namespace:tagname>'
+    >>> token.name
+    'namespace:tagname'
+    >>> token.ns_prefix
+    'namespace'
+    >>> token.name = 'tagname2'
+    >>> token.xml
+    '</tagname2>'
+    >>> token.ns_prefix
+    ''
 
 Comment tokens have a single property: content.
 
-	>>> token = Comment('<!-- A comment. -->')
-	>>> token.content
-	' A comment. '
-	>>> token.xml
-	'<!-- A comment. -->'
-	>>> token.content = 'A different comment.   '
-	>>> token.xml
-	'<!--A different comment.   -->'
+    >>> token = Comment('<!-- A comment. -->')
+    >>> token.content
+    ' A comment. '
+    >>> token.xml
+    '<!-- A comment. -->'
+    >>> token.content = 'A different comment.   '
+    >>> token.xml
+    '<!--A different comment.   -->'
 
 Processing instructions (PIs) have two properties: target and instruction.
 
-	>>> token = PI('<?targetname instructions go here?>')
-	>>> token.target
-	'targetname'
-	>>> token.instruction
-	'instructions go here'
-	>>> token.xml   
-	'<?targetname instructions go here?>'
-	>>> token.target = 'targetname2'
-	>>> token.xml
-	'<?targetname2 instructions go here?>'
-	>>> token.instruction = 'other instructions'
-	>>> token.xml
-	'<?targetname2 other instructions?>'
+    >>> token = PI('<?targetname instructions go here?>')
+    >>> token.target
+    'targetname'
+    >>> token.instruction
+    'instructions go here'
+    >>> token.xml
+    '<?targetname instructions go here?>'
+    >>> token.target = 'targetname2'
+    >>> token.xml
+    '<?targetname2 instructions go here?>'
+    >>> token.instruction = 'other instructions'
+    >>> token.xml
+    '<?targetname2 other instructions?>'
 
 PIs also recognize pseudo-attributes in the instruction.
 
-	>>> token = PI('<?targetname pseudoattr1="value1" pseudoattr2="value2 value3"?>')
-	>>> token.target
-	'targetname'
-	>>> token.instruction
-	'pseudoattr1="value1" pseudoattr2="value2 value3"'
-	>>> token['pseudoattr1']
-	'value1'
-	>>> token['pseudoattr1'] = 'value4'
-	>>> token.xml
-	'<?targetname pseudoattr1="value4" pseudoattr2="value2 value3"?>'
-	>>> token['pseudoattr3'] = 'value5'
-	>>> token.xml
-	'<?targetname pseudoattr1="value4" pseudoattr2="value2 value3" pseudoattr3="value5"?>'
-	>>> 'pseudoattr2' in token
-	True
-	>>> 'pseudoattr4' in token
-	False
-	>>> del token['pseudoattr2']
-	>>> token.xml
-	'<?targetname pseudoattr1="value4" pseudoattr3="value5"?>'
-	>>> token.instruction = 'simple instruction'
-	>>> 'pseudoattr1' in token
-	False
-	>>> token.xml
-	'<?targetname simple instruction?>'
-	>>> token['att1'] = 'one'
-	>>> token['attr2'] = 'two'
-	>>> token.xml
-	'<?targetname simple instruction att1="one" attr2="two"?>'
-	>>> token.instruction
-	'simple instruction att1="one" attr2="two"'
+    >>> token = PI('<?targetname pseudoattr1="value1" pseudoattr2="value2 value3"?>')
+    >>> token.target
+    'targetname'
+    >>> token.instruction
+    'pseudoattr1="value1" pseudoattr2="value2 value3"'
+    >>> token['pseudoattr1']
+    'value1'
+    >>> token['pseudoattr1'] = 'value4'
+    >>> token.xml
+    '<?targetname pseudoattr1="value4" pseudoattr2="value2 value3"?>'
+    >>> token['pseudoattr3'] = 'value5'
+    >>> token.xml
+    '<?targetname pseudoattr1="value4" pseudoattr2="value2 value3" pseudoattr3="value5"?>'
+    >>> 'pseudoattr2' in token
+    True
+    >>> 'pseudoattr4' in token
+    False
+    >>> del token['pseudoattr2']
+    >>> token.xml
+    '<?targetname pseudoattr1="value4" pseudoattr3="value5"?>'
+    >>> token.instruction = 'simple instruction'
+    >>> 'pseudoattr1' in token
+    False
+    >>> token.xml
+    '<?targetname simple instruction?>'
+    >>> token['att1'] = 'one'
+    >>> token['attr2'] = 'two'
+    >>> token.xml
+    '<?targetname simple instruction att1="one" attr2="two"?>'
+    >>> token.instruction
+    'simple instruction att1="one" attr2="two"'
 
 XML Declarations (XmlDecl) are a subclass of PI and so have the same
 properties.
@@ -202,4 +202,26 @@ CDATA sections (Cdata) have two properties: content and escaped_content.
     >>> token.xml
     '<![CDATA[abc]]>'
 
-Error tokens do not have any properties.
+Error tokens add a span attribute, which shows the token's location in the original string.
+
+    >>> s = '<p>Some <i text.</p>'
+    >>> tokens = tokenize(s, error_stream=None)
+    >>> for token in tokens:
+    ...     if token.is_a(Error):
+    ...         print repr(token)
+    ...         print token.span
+    ...
+    Error('<i ')
+    (8, 11)
+    >>> s[8:11]
+    '<i '
+
+In the example above, the tokenizer will also report syntax errors on stderr, showing the exact location of the error. ::
+
+    Syntax error in markup:
+    "<p>Some <i
+                text.</p>"
+
+This behavior can be disabled by setting the tokenizer's error_stream to None.
+
+    >>> tokens = tokenize(s, error_stream=None)

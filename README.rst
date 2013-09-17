@@ -339,8 +339,8 @@ In fact, you'll need to keep in mind the lazy execution when wrapping filter cha
 
 >>> def error_filter(tokens):
 ...     for token in tokens:
-...             raise RuntimeError, 'hit error'
-...             yield token
+...         raise RuntimeError, 'hit error'
+...         yield token
 ...
 >>> tokens = tokenize(s)
 >>> try:
