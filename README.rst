@@ -14,41 +14,40 @@ __
 .. _REX shallow parsing: http://www.cs.sfu.ca/~cameron/REX.html
 
 
-``rexlib`` Basics
-=================
+Basics
+======
 
-``rexlib`` isn't an XML API per se, however it does provide an API for tokens. Each token is a instance of one of the following classes:
+``rexlib`` isn't an XML API per se, however it does provide an API for tokens. Each token is an instance of one of the following classes:
 
-    ``Text``
-      Plain text: a run of text not containing the ``<`` character
+``Text``
+    Plain text: a run of text not containing the ``<`` character
 
-    ``Start``
-      A start tag: ``<tag>`` or ``<tag att="val">``
+``Start``
+    A start tag: ``<tag>`` or ``<tag att="val">``
 
-    ``Empty``
-        An empty tag: ``<tag/>`` or ``<tag att="val"/>``
+``Empty``
+    An empty tag: ``<tag/>`` or ``<tag att="val"/>``
 
-    ``End``
-        An end tag: ``</tag>``
+``End``
+    An end tag: ``</tag>``
 
-    ``Comment``
-        A comment: ``<!-- comment -->``
+``Comment``
+    A comment: ``<!-- comment -->``
 
-    ``PI``
-        A processing instruction: ``<?target instruction?>``
+``PI``
+    A processing instruction: ``<?target instruction?>``
 
-    ``XmlDecl``
-        An XML Declaration: ``<?xml version="1.0" ...?>``
+``XmlDecl``
+    An XML Declaration: ``<?xml version="1.0" ...?>``
 
-    ``Doctype``
-        A DOCTYPE declaration: ``<!DOCTYPE tag ...>``
+``Doctype``
+    A DOCTYPE declaration: ``<!DOCTYPE tag ...>``
 
-    ``Cdata``
-        A CDATA section: ``<![CDATA[ literal <markup/> ]]>``
+``Cdata``
+    A CDATA section: ``<![CDATA[ literal <markup/> ]]>``
 
-    ``Error``
-        A markup error: a token starting with ``<`` that does not end with 
-        ``>``
+``Error``
+    A markup error: a token starting with ``<`` that does not end with ``>``
 
 All token classes are subclasses of the abstract class ``Token``. Here is the class hierarchy for tokens::
 
@@ -74,7 +73,7 @@ Let's tokenize some XML and see what we get:
 >>> s = '<p>Hello <pre>rexlib</pre> World!</p>'
 >>> tokens = tokenize(s)
 
-Note that ``tokenize()``, above, is a generator function; it returns a generator object that yields tokens.
+Note that ``tokenize()`` is a generator function; it returns a generator object that yields tokens.
 
 >>> type(tokens)
 <type 'generator'>
@@ -107,7 +106,7 @@ End('</p>')
 or you can invoke the generator's ``next()`` method
 
 >>> tokens = tokenize(s)
->>> tokens.next()
+>>> tokens.next()  # next(tokens) works as well
 Start('<p>')
 >>> tokens.next()
 Text('Hello ')
@@ -115,7 +114,7 @@ Text('Hello ')
 or by using a list comprehension.
 
 >>> tokens = tokenize(s)
->>> [ token.xml for token in tokens ]
+>>> [token.xml for token in tokens]
 ['<p>', 'Hello ', '<pre>', 'rexlib', '</pre>', ' World!', '</p>']
 
 Note ``token.xml``, in the list comprehension above. All subclasses of Token have an ``xml`` attribute that stores the current serialization of the token. When each token is instantiated, it is parsed into its components (tag name, attributes, etc.). Unless you modify the token, ``token.xml`` is just the original (unaltered) XML string. As soon as you change the token in some way, the token is reserialized (rebuilt from its components). Reserialization doesn't happen until you make a change (or manually call token.reserialize()). For example,
@@ -219,18 +218,18 @@ Here's a ``rexlib`` solution to `Nelson Minar's`_ problem extracting 'xmlUrl' at
 >>> s = open('foo.opml').read()
 >>> tokens = tokenize(s)
 >>> for token in tokens:
-...     if token.is_a(StartOrEmpty) and token.has_attribute('xmlUrl'):
+...     if token.is_a(StartOrEmpty) and 'xmlUrl' in token:
 ...         print token['xmlUrl']
 
 You could also write a simple generator function.
 
->>> def extract_xmlUrl_atts(tokens):
+>>> def extract_xmlUrl_attributes(tokens):
 ...     for token in tokens:
-...         if token.is_a(StartOrEmpty) and token.has_attribute('xmlUrl'):
+...         if token.is_a(StartOrEmpty) and 'xmlUrl' in token:
 ...             yield token['xmlUrl']
 ...
 >>> tokens = tokenize(s)
->>> print list(extract_xmlUrl_atts(tokens))
+>>> print list(extract_xmlUrl_attributes(tokens))
 
 __
 .. _Nelson Minar's: http://www.nelson.monkey.org/~nelson/weblog/tech/python/xpath.html
@@ -239,7 +238,7 @@ __
 Example 2
 ~~~~~~~~~
 
-Here's a simple extraction problem lifted from an entry (Jan. 23, 2005) in `Uche Ogbuji's O'Reilly weblog`_: 
+Here's a simple extraction problem lifted from an entry in `Uche Ogbuji's O'Reilly weblog`_: 
 
     The idea is simply to print all verses containing the word 'begat' [in] `Jon Bosak's Old Testament in XML`_, a 3.3MB document. A quick note on the characteristics of the file: it contains 23145 v elements containing each Bible verse and only text: no child elements. The v elements and their content represent about 3.2 of the file's total 3.3MB.
 
@@ -268,7 +267,7 @@ To make this problem a little more realistic, let's pretend the document is mark
 
 ``accumulate_tokens()`` looks at its first argument (which needs to be a ``Start`` or ``Empty`` token) and iterates through its second argument looking for the matching end token. ``accumulate_tokens()`` is a generator function, which means it returns a generator. That generator is now bound to ``v_tokens``, above.
 
-Remember that generators are lazy: no work is done until you start iterating through them. It's kind of hard to wrap your brain around at first but, at this point in the code, we haven't actually accumulated any tokens. The simplest way to force evaluation is to wrap ``v_tokens`` in a ``list()``. ::
+Remember that generators are lazy: no work is done until you start iterating through them. At this point in the code, we haven't actually accumulated any tokens. The simplest way to force evaluation is to wrap ``v_tokens`` in a ``list()``. ::
 
     .       v_list = list(v_tokens)  # unwind the generator
 
@@ -279,7 +278,7 @@ Now it's time to do something with the ``v`` element. Let's say the ``v`` elemen
     <v>And <a href="#Seth">Seth</a> lived an hundred and five years, and 
        begat <a href="#Enos">Enos</a>:</v>
 
-Here it would be safe to concatenate the tokens into an XML string (markup included) and search for "begat". However, since we're probably only interested in finding "begat" in the text and would rather avoid finding begat, say, in an attribute value, we need a way to strip the markup from the text. The ``rexlib`` function ``concat_tokens()`` will handle both cases.
+Here it would be safe to concatenate the tokens into an XML string (markup included) and search for "begat". However, since we're probably only interested in finding "begat" in the text and would rather avoid finding begat, say, in an attribute value, we need a way to target only the text tokens. The ``rexlib`` function ``concat_tokens()`` will handle both cases.
 
 >>> s = ('<v>And <a href="#Seth">Seth</a> lived an hundred and five years, '
 ...      'and begat <a href="#Enos">Enos</a>:</v>')
@@ -289,7 +288,7 @@ Here it would be safe to concatenate the tokens into an XML string (markup inclu
 '<v>And <a href="#Seth">Seth</a> lived an hundred and five years, and begat <a href="#Enos">Enos</a>:</v>'
 
 >>> tokens = tokenize(s)
->>> concat_tokens(tokens, Text)  # filters out all but Text tokens
+>>> concat_tokens(tokens, Text)  # include only Text tokens
 'And Seth lived an hundred and five years, and begat Enos:'
 
 The second argument to ``concat_tokens`` is used as a filter: it will preserve tokens of the type specified. If you wanted only the start and end tags, you could use
@@ -297,8 +296,6 @@ The second argument to ``concat_tokens`` is used as a filter: it will preserve t
 >>> tokens = tokenize(s)
 >>> concat_tokens(tokens_list, (Start, End))
 '<v><a href="#Seth"></a><a href="#Enos"></a></v>'
-
-(Implementation detail: the second argument to ``concat_tokens`` is passed through as the second argument to ``isinstance()``, which requires the tuple.)
 
 Let's restate the previous code and finish it up.
 
@@ -320,8 +317,7 @@ Simple extraction is one possibility. But with just a little additional work, we
 ...             v_list = list(v_tokens)
 ...             if 'begat' in concat_tokens(v_list, Text):
 ...                 # add an annotate attribute to <v>
-...                 token['annotate'] = 'begat'  # token and v_list[0] are
-...                                              # the same object; see why?
+...                 token['annotate'] = 'begat'
 ...             for token in v_list:
 ...                 yield token  # yield the element we accumulated
 ...         else:
@@ -357,7 +353,7 @@ In fact, you'll need to keep in mind the lazy execution when wrapping filter cha
 Traceback (most recent call last):
   File "<stdin>", line 1, in ?
   File "rexlib/token_filters.py", line 29, in concat_tokens
-    return ''.join([ token.xml for token in tokens ])
+    return ''.join([token.xml for token in tokens])
   File "<stdin>", line 2, in error_filter
   File "<stdin>", line 2, in annotate_begat
   File "<stdin>", line 3, in error_filter
@@ -366,7 +362,7 @@ RuntimeError: hit error
 Notice that the exception wasn't caught. That's because the generators don't "unwind" until ``concat_tokens(tokens)`` is run. ``concat_tokens()`` isn't magical, it's just the first bit of code that actually forces iteration though the tokens.
 
 
-There have been occasions where I've writen token filters thinking as if each filter iterates through the tokens completely before moving on to the next filter, only to find unexpected output. If you have a filter that depends on a previous filter having finished it's job, you'll need to force execution by manually iterating... or wrapping with list()... ::
+There have been occasions where I've writen token filters thinking as if each filter iterates through the tokens completely before moving on to the next filter, only to find unexpected output. If you have a filter that depends on a previous filter having finished it's job, you'll need to force execution by manually iterating or wrapping with list(). ::
 
     tokens = tokenize(s)
     
@@ -391,7 +387,7 @@ There have been occasions where I've writen token filters thinking as if each fi
     for token in tokens:
         ...  # a for loop also causes filters1 and filter2 to run to completion
 
-Keep in mind that using list(tokens), not to mention concat_tokens(), will load all the tokens into memory at once; this could consume a lot of memory if you're working with very large XML files. Simple token filters are very memory friendly and fast, much like a pipeline!
+Keep in mind that using list(tokens), not to mention concat_tokens(), will load all the tokens into memory at once; this could consume a lot of memory if you're working with very large XML files. Simple token filters are very memory friendly and fast, much like a pipeline.
 
 __
 .. _Uche Ogbuji's O'Reilly weblog: http://www.oreillynet.com/pub/wlg/6291
@@ -410,28 +406,28 @@ All tokens inherit from an abstract base class, ``Token``, which provides the fo
 
 Methods:
 ~~~~~~~~
-    ``is_a(token_class)``
-        Checks to see whether the current token (self) is an instance of ``token_class``.
+``is_a(token_class)``
+    Checks to see whether the current token (self) is an instance of ``token_class``.
 
-    ``reserialize()``
-        Rebuilds the token's ``xml`` attribute based on internal state. Whenever a change is made to the token, ``reserialize()`` is automatically called. About the only time you'll  call ``reserialize`` manually is when you've changed the ``template`` class attribute and want the token to reflect the change. See the ``template`` attribute, described below. 
+``reserialize()``
+    Rebuilds the token's ``xml`` attribute based on internal state. Whenever a change is made to the token, ``reserialize()`` is automatically called. About the only time you'll  call ``reserialize`` manually is when you've changed the ``template`` class attribute and want the token to reflect the change. See the ``template`` attribute, described below. 
 
-    ``__repr__()``
-        Controls the representation of the the token in the interactive interpreter. By default, shows only the first 45 characters of the ``xml`` attribute (controlled by the class attribute ``MAX_REPR_WIDTH``); for example,
+``__repr__()``
+    Controls the representation of the the token in the interactive interpreter. By default, shows only the first 45 characters of the ``xml`` attribute (controlled by the class attribute ``MAX_REPR_WIDTH``); for example,
 
-        >>> Start('<very-long-tag-name att1="value1" att2="value2" att3="value3">')
-        Start('<very-long-tag-name att1="value1" att2="value2" ...')
+    >>> Start('<very-long-tag-name att1="value1" att2="value2" att3="value3">')
+    Start('<very-long-tag-name att1="value1" att2="value2" ...')
 
 Attributes:
 ~~~~~~~~~~~
-    ``xml``
-        Stores the serialized form of the token.
- 
-    ``template``
-        String template used for reserialization. ``template`` is a class attribute, shared by all instances. If, for example, you wanted ``Empty`` tags to serialize as ``<tag />`` rather than ``<tag/>`` you could set the class attribute ``Empty.template = '<%s%s />`` and write a token filter that invokes each ``Empty`` token's ``reserialize()`` method. Setting ``Empty.template`` does not cause reserialization automatically because the class doesn't hold references to its instances. The default value for ``Empty.template`` is ``<%s%s/>``.
+``xml``
+    Stores the serialized form of the token.
 
-	``encoding``
-		Stores the encoding declared in a document's XML declaration. Defaults to sys.getdefaultencoding. [TODO: What about processing fragments -- only use it if you want to be encoding-aware? How to handle fragments if internal Unicode fanciness is happening?]
+``template``
+    String template used for reserialization. ``template`` is a class attribute, shared by all instances. If, for example, you wanted ``Empty`` tags to serialize as ``<tag />`` rather than ``<tag/>`` you could set the class attribute ``Empty.template = '<%s%s />`` and write a token filter that invokes each ``Empty`` token's ``reserialize()`` method. Setting ``Empty.template`` does not cause reserialization automatically because the class doesn't hold references to its instances. The default value for ``Empty.template`` is ``<%s%s/>``.
+
+``encoding``
+    Stores the encoding declared in a document's XML declaration. Defaults to sys.getdefaultencoding. [TODO: What about processing fragments -- only use it if you want to be encoding-aware? How to handle fragments if internal Unicode fanciness is happening?]
 
 ``Text``
 --------
@@ -440,8 +436,8 @@ To the basic interface inherited from ``Token``, the ``Text`` class adds one pro
 
 Properties:
 ~~~~~~~~~~~
-    ``isspace``
-        The value of ``isspace`` will be ``True`` if the token contains only whitespace; it's False otherwise.
+``isspace``
+    The value of ``isspace`` will be ``True`` if the token contains only whitespace; it's False otherwise.
 
 
 ``Start``, ``Empty``, \[``StartOrEmpty``\]
@@ -483,81 +479,77 @@ Remember, ``StartOrEmpty`` will match both start and empty tags; ``End`` will ma
 
 Methods:
 ~~~~~~~~
-    ``is_a(token_class, *names)``
-        Checks to see whether the current token (``self``) is an instance of ``token_class``. You can also pass one or more tag names as arguments to refine the test.
+``is_a(token_class, *names)``
+    Checks to see whether the current token (``self``) is an instance of ``token_class``. You can also pass one or more tag names as arguments to refine the test.
 
-    ``has_attribute(attribute_name)``
-        Checks if token has an attribute named ``attribute_name``; returns ``True`` or ``False``.
+``attribute_name in token``
+    Checks if token has an attribute named ``attribute_name``; returns ``True`` or ``False``.
 
-    ``delete_attribute(attribute_name)``
-        Deletes attribute named ``attribute_name`` if it exists; no error is raised if it doesn't exist.
+``del token[attribute_name]``
+    Deletes attribute named ``attribute_name`` if it exists; no error is raised if it doesn't exist.
 
-    ``set_attribute_order(attribute_order=[], sort=False)``
-        Re-orders attributes based on ``attribute_order`` list. Any attributes listed in ``attribute_order`` will appear first (and in that order); any remaining attributes will follow in original order. If ``sort`` is set to ``True``, any *remaining* attributes will appear in case-insensitive sorted order. If you want to sort all attributes, use either ``set_attribute_order(sort=True)`` or ``set_attribute_order(attribute_order=[], sort=True)``.
+``set_attribute_order(attribute_order=['attr1', 'attr2'], sort=False)``
+    Re-orders attributes based on ``attribute_order`` list. Any attributes listed in ``attribute_order`` will appear first (and in that order); any remaining attributes will follow in original order. If ``sort`` is set to ``True``, any *remaining* attributes will appear in case-insensitive sorted order. If you want to sort all attributes, use ``set_attribute_order(sort=True)``.
 
-    ``__getitem__``, ``__setitem__``, and ``__delitem__``
-        Attributes can be assigned, retrieved, and deleted using index notation 
-        on each token.
+``__getitem__``, ``__setitem__``, and ``__delitem__``
+    Attributes can be assigned, retrieved, and deleted using index notation on each token. Getting or deleting an attribute that is not present will not raise an exception.
 
-        >>> token = Start('<p>')
-        >>> token['class'] = 'block'  # assign attribute
-        Start('<p class="block">')
+    >>> token = Start('<p>')
+    >>> token['class'] = 'block'  # assign attribute
+    Start('<p class="block">')
 
-        >>> token['class']  # get attribute
-        'block'
-        
-        >>> del token['class']  # delete attribute
-        >>> token  
-        Start('<p>')
+    >>> token['class']  # get attribute
+    'block'
     
-        It may be be less error prone to use ``delete_attribute('attribute_name')`` since it won't raise an error if the attribute doesn't exist.
+    >>> del token['class']  # delete attribute
+    >>> token  
+    Start('<p>')
 
-        >>> token.delete_attribute('class')
 
 Attributes:
 ~~~~~~~~~~~
-    ``attributes``
-        A dictionary-like object that preserves attribute order. You'll usually get and set attributes using index notation. See ``__getitem__`` description above for examples.
+``attributes``
+    A dictionary-like object that preserves attribute order. You'll usually get and set attributes using index notation. See ``__getitem__`` description above for examples.
 
-        ``attributes`` is an instance of ``AttributeDict``, which adds three methods to the usual dictionary interface: ``has_key_nocase()``, which simplifies matching attributes with inconsistent case; ``set_attribute_order()``, which lets you specify attribute order; and ``toXml()``, which serializes the attributes as XML.
+    ``attributes`` is an instance of ``AttributeDict``, which adds three methods to the usual dictionary interface: ``has_key_nocase()``, which simplifies matching attributes with inconsistent case; ``set_attribute_order()``, which lets you specify attribute order; and ``to_xml()``, which serializes the attributes as XML.
 
-        >>> token = Start('<p Class="block" indent="no">')
-        >>> token.attributes
-        {'Class': 'block', 'indent': 'no'}
-        >>> token.attributes.has_key_nocase('class')
-        True
+    >>> token = Start('<p Class="block" indent="no">')
+    >>> token.attributes
+    {'Class': 'block', 'indent': 'no'}
+    >>> token.attributes.has_key_nocase('class')
+    True
 
-        >>> token.set_attribute_order(['indent', 'Class'])
-        >>> token
-        Start('<p indent="no" Class="block">')
+    >>> token.set_attribute_order(['indent', 'Class'])
+    >>> token
+    Start('<p indent="no" Class="block">')
 
-        >>> token.attributes.toXml()
-        ' Class="block" indent'
-        >>> token.template % (token.name, token.attributes.toXml())
-        '<p Class="block" indent="no">'
+    >>> token.attributes.to_xml()
+    ' Class="block" indent'
+    >>> token.template % (token.name, token.attributes.to_xml())
+    '<p Class="block" indent="no">'
 
-        Note that ``toXml()`` normalizes attribute value delimiters to double quotes. Any double quotes appearing in attribute values are escaped as &quot;. Adjust the source if you prefer single quotes.
+    Note that ``to_xml()`` normalizes attribute value delimiters to double quotes. Any double quotes appearing in attribute values are escaped as &quot;. Adjust the source if you prefer single quotes.
 
-        >>> token = Start("""<p x='funky "quoted" attribute'>""")
-        >>> token
-        Start('<p x=\'funky "quoted" attribute\'>')
-        >>> token.attributes
-        {'x': 'funky "quoted" attribute'}
-        >>> token.attributes.toXml()
-        ' x="funky &quot;quoted&quot; attribute"'
+    >>> token = Start("""<p x='funky "quoted" attribute'>""")
+    >>> token
+    Start('<p x=\'funky "quoted" attribute\'>')
+    >>> token.attributes
+    {'x': 'funky "quoted" attribute'}
+    >>> token.attributes.to_xml()
+    ' x="funky &quot;quoted&quot; attribute"'
 
 Note that this normalization only happens if the token is modified (which triggers the ``reserialize()`` method).
 
 
 Properties:
 ~~~~~~~~~~~
-   ``name``
-        The tag name.
+``name``
+    The tag name.
 
-    ``ns_prefix``
-        The namespace prefix, if present; an empty string otherwise. 
+``ns_prefix``
+    The namespace prefix, if present; an empty string otherwise. 
 
-        *Namespaces disclaimer:* Since ``rexlib`` works mostly at the lexical level, it doesn't try to be sophisticated about namespaces. Tag names are treated as strings; you're free to map them to URIs and track scope as part of a token filter. However, if namespaces are important to your application, it wouldn't be hard for you to extend ``rexlib``, say to make ``is_a()`` tests work something like ``token.is_a(Start, (HTML_URI, 'p'))`` to match ``<html:p>`` and where "html" is actually mapped to a URI for purposes of comparison. Of course, each token would then need store the namespace mappings that were in effect when it was instantiated. More practically, the Tag class could be used to store all known namespace mappings as they're encountered (with the mapping being visible to the ``Start``, ``Empty``, and ``End`` subclasses); this would be much lighter-weight solution. The whole point of ``rexlib`` for me was that it was easy to extend whenever a new problem proved akward to solve with XSLT, etc. So don't be afraid to read the source and modify it to solve the problems you face.
+    *Namespaces disclaimer:* Since ``rexlib`` works mostly at the lexical level, it doesn't try to be sophisticated about namespaces. Tag names are treated as strings; you're free to map them to URIs and track scope as part of a token filter. However, if namespaces are important to your application, it wouldn't be hard for you to extend ``rexlib``, say to make ``is_a()`` tests work something like ``token.is_a(Start, (HTML_URI, 'p'))`` to match ``<html:p>`` and where "html" is actually mapped to a URI for purposes of comparison. Of course, each token would then need store the namespace mappings that were in effect when it was instantiated. More practically, the Tag class could be used to store all known namespace mappings as they're encountered (with the mapping being visible to the ``Start``, ``Empty``, and ``End`` subclasses); this would be much lighter-weight solution. The whole point of ``rexlib`` for me was that it was easy to extend whenever a new problem proved akward to solve with XSLT, etc. So don't be afraid to read the source and modify it to solve the problems you face.
 
 
 Exploring the token APIs
@@ -644,9 +636,8 @@ True
 
 >>> token.template
 '<%s%s>'
->>> token.template % (token.name, token.attributes.toXml())
+>>> token.template % (token.name, token.attributes.to_xml())
 '<para class="newer_text" indent="no">'
-
 
 ``Empty``
 ~~~~~~~~~
@@ -721,40 +712,115 @@ If you want to change a pseudo-attribute, you'll need to rewrite the whole instr
 ``XmlDecl``
 ~~~~~~~~~~~~
 
+XML Declarations (XmlDecl) are a subclass of PI and so have the same properties.
+
+>>> token = XmlDecl('<?xml version="1.0" encoding="utf-8"?>')
+>>> token.target
+'xml'
+>>> token.instruction
+'version="1.0" encoding="utf-8"'
+>>> token['version']
+'1.0'
+
 ``Doctype``
 ~~~~~~~~~~~
+
+Doctypes have four properties: document_element, identifier_type, identifier, and internal_subset.
+
+>>> token = Doctype('<!DOCTYPE x:body SYSTEM "/S:/xml/dtd/xhtml1-strict-prefixed.dtd" [<!ENTITY abc "xyz">]>')
+>>> token.document_element
+'x:body'
+>>> token.id_type
+'SYSTEM'
+>>> token.id_value
+'/S:/xml/dtd/xhtml1-strict-prefixed.dtd'
+>>> token.internal_subset
+'<!ENTITY abc "xyz">'
+>>> token = Doctype('<!DOCTYPE x:body SYSTEM "/S:/xml/dtd/xhtml1-strict-prefixed.dtd" [<!ENTITY abc "xyz">]>')
+>>> token.document_element = 'html'
+>>> token.id_type = 'PUBLIC'
+>>> token.id_value = '-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'
+>>> token.internal_subset = ''
+>>> token.xml
+'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 
 ``Cdata``
 ~~~~~~~~~
 
+CDATA sections (Cdata) have two properties: content and escaped_content.
+
+>>> token = Cdata('<![CDATA[ literal <markup/> ]]>')
+>>> token.to_text_token()
+Text(' literal &lt;markup/> ')
+>>> token.content
+' literal <markup/> '
+>>> token.escaped_content
+' literal &lt;markup/> '
+>>> token.content = 'abc'
+>>> token.xml
+'<![CDATA[abc]]>'
+
+
 ``Comment``
 ~~~~~~~~~~~
 
+Comment tokens have a single property: content.
+
+>>> token = Comment('<!-- A comment. -->')
+>>> token.content
+' A comment. '
+>>> token.xml
+'<!-- A comment. -->'
+>>> token.content = 'A different comment.   '
+>>> token.xml
+'<!--A different comment.   -->'
+
 ``Error``
 ~~~~~~~~~
+
+Error tokens add a span attribute, which shows the token's location in the original string.
+
+>>> s = '<p>Some <i text.</p>'
+>>> tokens = tokenize(s)
+>>> for token in tokens:
+...     if token.is_a(Error):
+...         print repr(token)
+...         print token.span
+... 
+Error('<i ')
+(8, 11)
+>>> s[8:11]
+'<i '
+
+In the example above, the tokenizer will also report syntax errors on stderr, showing the exact location of the error. ::
+
+    Syntax error in markup:
+    "<p>Some <i 
+                text.</p>"
+
+This behavior can be disabled by setting the tokenizer's error_stream to None.
+
+>>> tokens = tokenize(s, error_stream=None)
 
 
 TO DO:
 ======
 
-Remaining tokens, above.
+Explain the UTF-8 expectations of the SPE. Changing the SPE to use Unicode? PCRE has a DFA algorithm -- how to access pcre_test from Python?
 
-Explain the UTF-8 expectations of the SPE. What about codecs.open() vs converting to Unicode for each token separately? What about changing the SPE to use Unicode? Don't forget PCRE's DFA algorithm -- how to access pcre_test from Python?
-
-Document Token.encoding and Doctype trigger that updates class attribute.
+Document intent of Token.encoding and Doctype trigger that updates class attribute.
 
 Show examples of enumerate() idiom and why it's useful: lets you do lookaheads by calling next() within a loop but makes it easy to keep track of current index while also letting you use continue to skip over some code but continue looping.
 
 Add a Limitations section, giving examples where token processing can become onerous or error-prone.
 
-Explain that SGML can be tokenized by using a modified shallow parsing expression, providing that the SGML resembles XML (handles SGML's different PI and empty tag syntax -- although lack of well-formedness makes SGML processing not terribly fun: show example of making SGML well-formed (sgml -> xml), etc.). (Add rex_sgml.py?)
+Explain that SGML can be tokenized by using a modified shallow parsing expression, providing that the SGML resembles XML (handles SGML's different PI and empty tag syntax -- although lack of well-formedness makes SGML processing not terribly fun: show example of making SGML well-formed (sgml -> xml), etc.).
 
 Note that assigning directly to token.xml (except for ``Text``) should not be done if there's a chance that reserialization might be triggered later on: ``reserialize()`` overwrites ``token.xml`` based on internal state. (I'd rather not make ``token.xml`` a property.)
 
-Gather together more real-world (simple, complex, and too-complex) examples.
+More real-world (simple, complex, and too-complex) examples.
 
 
 ----
 
 Copyright 2013, David Niergarth
-
